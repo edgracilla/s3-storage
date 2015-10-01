@@ -1,0 +1,25 @@
+[
+  {
+	"name": "apikey",
+	"label": "API Key",
+	"type": "String",
+	"required": true
+  },
+  {
+	"name": "secret",
+	"label": "Secret", //Error, Message, Exception, Query (defaults to error)
+	"type": "String",
+	"required": true
+  },
+  {
+	"name": "bucket",
+	"label": "Log Level", //info, error, exception, warning
+	"type": "String",
+	"required": true
+  }
+
+]
+
+
+
+
