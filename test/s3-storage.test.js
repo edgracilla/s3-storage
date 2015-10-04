@@ -1,19 +1,41 @@
 'use strict';
 
+var ACCESS_KEY_ID     = 'AKIAI36Q5BC445TNH3ZA',
+	SECRET_ACCESS_KEY = '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',
+	BUCKET            = 'reekoh-data',
+	REGION            = 'us-standard';
+
 var cp     = require('child_process'),
 	should = require('should'),
-	storage;
+	knox   = require('knox'),
+	storage, s3Client;
 
 describe('Storage', function () {
 	this.slow(5000);
 
-	after('terminate child process', function (done) {
+	before('initialize s3 client', function (done) {
+		s3Client = knox.createClient({
+			key: ACCESS_KEY_ID,
+			secret: SECRET_ACCESS_KEY,
+			bucket: BUCKET,
+			region: REGION
+		});
+
+		done();
+	});
+
+	after('terminate child process and delete the test file', function (done) {
 		this.timeout(5000);
 
 		setTimeout(function () {
 			storage.kill('SIGKILL');
 			done();
 		}, 4500);
+
+		s3Client.deleteFile('/reekoh-test.json', function (error, response) {
+			should.ifError(error);
+			should.equal(204, response.statusCode);
+		});
 	});
 
 	describe('#spawn', function () {
@@ -35,10 +57,10 @@ describe('Storage', function () {
 				type: 'ready',
 				data: {
 					options: {
-						key: 'AKIAI36Q5BC445TNH3ZA',
-						secret: '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',
-						bucket: 'reekoh-data',
-						region: 'us-standard'
+						key: ACCESS_KEY_ID,
+						secret: SECRET_ACCESS_KEY,
+						bucket: BUCKET,
+						region: REGION
 					}
 				}
 			}, function (error) {
@@ -52,11 +74,25 @@ describe('Storage', function () {
 			storage.send({
 				type: 'data',
 				data: {
+					s3FileName: 'reekoh-test.json',
+					s3FolderPath: '/',
 					key1: 'value1',
 					key2: 121,
 					key3: 40
 				}
 			}, done);
+		});
+
+		it('should should verify that the file was inserted', function (done) {
+			this.timeout(6000);
+
+			setTimeout(function () {
+				s3Client.getFile('/reekoh-test.json', function (error, response) {
+					should.ifError(error);
+					should.equal(200, response.statusCode);
+					done();
+				});
+			}, 3000);
 		});
 	});
 });

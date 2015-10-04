@@ -6,16 +6,22 @@ var _        = require('lodash'),
 	knox     = require('knox'),
 	platform = require('./platform'),
 	config   = require('./config.json'),
-	s3Client, s3path;
+	s3Client, s3Path;
 
 /*
  * Listen for the data event.
  */
 platform.on('data', function (data) {
-	var dataBuf = new Buffer(JSON.stringify(data, null, 4));
-	var filePath = path.join(s3path, uuid.v4() + '.json');
+	var fileName = data.s3FileName || uuid.v4() + '.json';
+	var filePath = path.join(s3Path, fileName);
 
-	s3Client.putBuffer(dataBuf, filePath, {
+	if (data.s3FolderPath)
+		filePath = path.join(path.resolve(data.s3FolderPath), fileName);
+
+	delete data.s3FileName;
+	delete data.s3FolderPath;
+
+	s3Client.putBuffer(new Buffer(JSON.stringify(data, null, 4)), filePath, {
 		'Content-Type': 'application/json'
 	}, function (error, response) {
 		if (error)
@@ -31,7 +37,7 @@ platform.on('data', function (data) {
  * Listen for the ready event.
  */
 platform.once('ready', function (options) {
-	s3path = _.isEmpty(options.path) ? config.path.default : path.resolve('/' + options.path);
+	s3Path = _.isEmpty(options.path) ? config.path.default : path.resolve('/' + options.path);
 
 	s3Client = knox.createClient({
 		key: options.key,
