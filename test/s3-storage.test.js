@@ -74,8 +74,8 @@ describe('Storage', function () {
 			storage.send({
 				type: 'data',
 				data: {
-					fileName: 'reekoh-test.json',
-					folderPath: '/',
+					s3FileName: 'reekoh-test.json',
+					s3FolderPath: '/',
 					key1: 'value1',
 					key2: 121,
 					key3: 40
