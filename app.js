@@ -1,49 +1,44 @@
 'use strict';
 
-var platform    = require('./platform'),
-	winston = require('winston'),
-	uuid    = require('node-uuid'),
-	knox	= require('knox'),
-	client;
-
-require('winston-loggly');
-
-/*
- * Listen for the ready event.
- */
-platform.once('ready', function (options) {
-
-	client = knox.createClient({
-		key: options.apikey,
-		secret: options.secret,
-		bucket: options.bucket
-	});
-
-
-	platform.log('Connected to AWS S3.');
-	platform.notifyReady(); // Need to notify parent process that initialization of this plugin is done.
-
-});
+var _        = require('lodash'),
+	path     = require('path'),
+	uuid     = require('node-uuid'),
+	knox     = require('knox'),
+	platform = require('./platform'),
+	config   = require('./config.json'),
+	s3Client, s3path;
 
 /*
  * Listen for the data event.
  */
 platform.on('data', function (data) {
+	var dataBuf = new Buffer(JSON.stringify(data, null, 4));
+	var filePath = path.join(s3path, uuid.v4() + '.json');
 
-	var req = client.put('/data/' + uuid.v4() + '.json', {
-		'Content-Length': Buffer.byteLength(string)
-		, 'Content-Type': 'application/json'
-	});
-
-	req.on('response', function(res){
-		if (res.statusCode !== 200) {
-			console.error('Error on AWS S3.', res);
-			platform.handleException(res);
+	s3Client.putBuffer(dataBuf, filePath, {
+		'Content-Type': 'application/json'
+	}, function (error, response) {
+		if (error)
+			platform.handleException(error);
+		else if (response.statusCode !== 200) {
+			console.error('Error on AWS S3.', response.statusMessage);
+			platform.handleException(new Error(response.statusMessage));
 		}
 	});
+});
 
-	req.end(string);
+/*
+ * Listen for the ready event.
+ */
+platform.once('ready', function (options) {
+	s3path = _.isEmpty(options.path) ? config.path.default : path.resolve('/' + options.path);
 
+	s3Client = knox.createClient({
+		key: options.key,
+		secret: options.secret,
+		bucket: options.bucket,
+		region: options.region || config.region.default
+	});
 
-
+	platform.notifyReady();
 });
