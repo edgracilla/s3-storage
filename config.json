@@ -20,7 +20,7 @@
   "region": {
 	"label": "Region",
 	"type": "String",
-	"enum": [
+	"select": [
 	  "us-standard",
 	  "us-west-2",
 	  "us-west-1",
