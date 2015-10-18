@@ -20,7 +20,7 @@
   "region": {
 	"label": "Region",
 	"type": "String",
-	"select": [
+	"enum": [
 	  "us-standard",
 	  "us-west-2",
 	  "us-west-1",
@@ -31,7 +31,7 @@
 	],
 	"required": false,
 	"default": "us-standard",
-	"help": "(Optional) Specify your AWS S3 Region. Default us-standard."
+	"help": "(Optional) Specify your AWS S3 Region. Default us-standard"
   },
   "path": {
 	"label": "Path",
