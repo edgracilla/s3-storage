@@ -1,9 +1,9 @@
 'use strict';
 
-var ACCESS_KEY_ID     = 'AKIAI36Q5BC445TNH3ZA',
-	SECRET_ACCESS_KEY = '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',
-	BUCKET            = 'reekoh-data',
-	REGION            = 'us-standard';
+const ACCESS_KEY_ID     = 'AKIAI36Q5BC445TNH3ZA',
+	  SECRET_ACCESS_KEY = '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',
+	  BUCKET            = 'reekoh-data',
+	  REGION            = 'us-standard';
 
 var cp     = require('child_process'),
 	should = require('should'),
