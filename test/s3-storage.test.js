@@ -11,7 +11,7 @@ var cp     = require('child_process'),
 	storage, s3Client;
 
 describe('Storage', function () {
-	this.slow(5000);
+	this.slow(8000);
 
 	before('initialize s3 client', function (done) {
 		s3Client = knox.createClient({
@@ -45,8 +45,8 @@ describe('Storage', function () {
 	});
 
 	describe('#handShake', function () {
-		it('should notify the parent process when ready within 5 seconds', function (done) {
-			this.timeout(5000);
+		it('should notify the parent process when ready within 8 seconds', function (done) {
+			this.timeout(8000);
 
 			storage.on('message', function (message) {
 				if (message.type === 'ready')
