@@ -1,7 +1,7 @@
 {
   "name": "s3-storage",
   "description": "S3 Storage Plugin for Reekoh IoT Platform. Stores your device data to Amazon S3.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Reekoh, Inc.",
   "main": "app.js",
   "scripts": {
