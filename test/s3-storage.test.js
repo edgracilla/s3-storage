@@ -5,9 +5,10 @@ const ACCESS_KEY_ID     = 'AKIAI36Q5BC445TNH3ZA',
 	  BUCKET            = 'reekoh-data',
 	  REGION            = 'us-standard';
 
-var cp     = require('child_process'),
-	should = require('should'),
-	knox   = require('knox'),
+var cp       = require('child_process'),
+	should   = require('should'),
+	knox     = require('knox'),
+	fileName = new Date().getTime().toString(),
 	storage, s3Client;
 
 describe('Storage', function () {
@@ -74,7 +75,7 @@ describe('Storage', function () {
 			storage.send({
 				type: 'data',
 				data: {
-					s3FileName: 'reekoh-test.json',
+					s3FileName: fileName + '.json',
 					s3FolderPath: '/',
 					key1: 'value1',
 					key2: 121,
@@ -87,7 +88,7 @@ describe('Storage', function () {
 			this.timeout(6000);
 
 			setTimeout(function () {
-				s3Client.getFile('/reekoh-test.json', function (error, response) {
+				s3Client.getFile(fileName + '.json', function (error, response) {
 					should.ifError(error);
 					should.equal(200, response.statusCode);
 					done();
