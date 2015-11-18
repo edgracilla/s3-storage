@@ -1,17 +1,16 @@
 'use strict';
 
-var path     = require('path'),
-	platform = require('./platform'),
+var path          = require('path'),
+	uuid          = require('node-uuid'),
+	platform      = require('./platform'),
+	isPlainObject = require('lodash.isplainobject'),
 	s3Client, s3Path;
 
 /*
  * Listen for the data event.
  */
 platform.on('data', function (data) {
-	var isJSON = require('is-json');
-
-	if (isJSON(data, true)) {
-		var uuid = require('node-uuid');
+	if (isPlainObject(data)) {
 		var fileName = data.s3FileName || uuid.v4() + '.json';
 		var filePath = path.join(s3Path, fileName);
 
@@ -54,11 +53,11 @@ platform.on('close', function () {
  * Listen for the ready event.
  */
 platform.once('ready', function (options) {
-	var _      = require('lodash'),
-		knox   = require('knox'),
-		config = require('./config.json');
+	var knox    = require('knox'),
+		config  = require('./config.json'),
+		isEmpty = require('lodash.isempty');
 
-	s3Path = _.isEmpty(options.path) ? config.path.default : path.resolve('/' + options.path);
+	s3Path = isEmpty(options.path) ? config.path.default : path.resolve('/' + options.path);
 
 	s3Client = knox.createClient({
 		key: options.key,
