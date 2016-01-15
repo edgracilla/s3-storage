@@ -1,7 +1,7 @@
 'use strict';
 
-const ACCESS_KEY_ID     = 'AKIAI36Q5BC445TNH3ZA',
-	  SECRET_ACCESS_KEY = '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',
+const ACCESS_KEY_ID     = 'AKIAJCDH5ZSQYJHPXOZQ',
+	  SECRET_ACCESS_KEY = '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',
 	  BUCKET            = 'reekoh-data',
 	  REGION            = 'us-standard';
 
