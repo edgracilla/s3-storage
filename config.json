@@ -7,7 +7,7 @@
   },
   "secret": {
 	"label": "Secret Access Key",
-	"type": "String",
+	"type": "Password",
 	"required": true,
 	"help": "Specify your AWS Secret Access Key"
   },
