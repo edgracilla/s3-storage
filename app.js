@@ -4,42 +4,50 @@ var path          = require('path'),
 	uuid          = require('node-uuid'),
 	platform      = require('./platform'),
 	isPlainObject = require('lodash.isplainobject'),
+	isArray = require('lodash.isarray'),
+	async = require('async'),
 	s3Client, s3Path;
 
-/*
- * Listen for the data event.
- */
+let sendData = (data) => {
+	var fileName = data.s3FileName || uuid.v4() + '.json';
+	var filePath = path.join(s3Path, fileName);
+
+	if (data.s3FolderPath)
+		filePath = path.join(path.resolve(data.s3FolderPath), fileName);
+
+	delete data.s3FileName;
+	delete data.s3FolderPath;
+
+	s3Client.putBuffer(new Buffer(JSON.stringify(data, null, 4)), filePath, {
+		'Content-Type': 'application/json'
+	}, function (error, response) {
+		if (error)
+			platform.handleException(error);
+		else if (response.statusCode !== 200) {
+			console.error('Error on AWS S3.', response.statusMessage);
+			platform.handleException(new Error(response.statusMessage));
+		}
+		else {
+			platform.log(JSON.stringify({
+				title: 'Added JSON file to AWS S3',
+				file: filePath,
+				data: data
+			}));
+		}
+	});
+};
+
 platform.on('data', function (data) {
-	if (isPlainObject(data)) {
-		var fileName = data.s3FileName || uuid.v4() + '.json';
-		var filePath = path.join(s3Path, fileName);
-
-		if (data.s3FolderPath)
-			filePath = path.join(path.resolve(data.s3FolderPath), fileName);
-
-		delete data.s3FileName;
-		delete data.s3FolderPath;
-
-		s3Client.putBuffer(new Buffer(JSON.stringify(data, null, 4)), filePath, {
-			'Content-Type': 'application/json'
-		}, function (error, response) {
-			if (error)
-				platform.handleException(error);
-			else if (response.statusCode !== 200) {
-				console.error('Error on AWS S3.', response.statusMessage);
-				platform.handleException(new Error(response.statusMessage));
-			}
-			else {
-				platform.log(JSON.stringify({
-					title: 'Added JSON file to AWS S3',
-					file: filePath,
-					data: data
-				}));
-			}
+	if(isPlainObject(data)){
+		sendData(data);
+	}
+	else if(isArray(data)){
+		async.each(data, function(datum){
+			sendData(datum);
 		});
 	}
 	else
-		platform.handleException(new Error('Invalid data received. ' + data));
+		platform.handleException(new Error(`Invalid data received. Data must be a valid Array/JSON Object or a collection of objects. Data: ${data}`));
 });
 
 /*
