@@ -2,30 +2,40 @@
 
 var path          = require('path'),
 	uuid          = require('node-uuid'),
+	mime          = require('mime-types'),
+	async         = require('async'),
+	isArray       = require('lodash.isarray'),
 	platform      = require('./platform'),
 	isPlainObject = require('lodash.isplainobject'),
-	isArray = require('lodash.isarray'),
-	async = require('async'),
-	s3Client, s3Path;
+	s3Client, s3Path, fileNameKey, fileContentKey;
 
-let sendData = (data) => {
-	var fileName = data.s3FileName || uuid.v4() + '.json';
+let sendData = function (data, callback) {
+	let fileName = '', fileContents = '';
+
+	if (fileNameKey) {
+		fileName = data[fileNameKey];
+		delete data[fileNameKey];
+	}
+	else
+		fileName = uuid.v4() + '.json';
+
+	if (fileContentKey && data[fileContentKey]) {
+		fileContents = new Buffer(data[fileContentKey], 'base64');
+		delete data[fileContentKey];
+	}
+	else
+		fileContents = new Buffer(JSON.stringify(data, null, 2));
+
 	var filePath = path.join(s3Path, fileName);
 
-	if (data.s3FolderPath)
-		filePath = path.join(path.resolve(data.s3FolderPath), fileName);
-
-	delete data.s3FileName;
-	delete data.s3FolderPath;
-
-	s3Client.putBuffer(new Buffer(JSON.stringify(data, null, 4)), filePath, {
-		'Content-Type': 'application/json'
-	}, function (error, response) {
+	s3Client.putBuffer(fileContents, filePath, {
+		'Content-Type': mime.lookup(fileName) || 'text/plain'
+	}, (error, response) => {
 		if (error)
-			platform.handleException(error);
+			callback(error);
 		else if (response.statusCode !== 200) {
 			console.error('Error on AWS S3.', response.statusMessage);
-			platform.handleException(new Error(response.statusMessage));
+			callback(new Error(response.statusMessage));
 		}
 		else {
 			platform.log(JSON.stringify({
@@ -33,17 +43,23 @@ let sendData = (data) => {
 				file: filePath,
 				data: data
 			}));
+
+			callback();
 		}
 	});
 };
 
 platform.on('data', function (data) {
-	if(isPlainObject(data)){
-		sendData(data);
+	if (isPlainObject(data)) {
+		sendData(data, (error) => {
+			if (error) platform.handleException(error);
+		});
 	}
-	else if(isArray(data)){
-		async.each(data, function(datum){
-			sendData(datum);
+	else if (isArray(data)) {
+		async.each(data, (datum, done) => {
+			sendData(datum, done);
+		}, (error) => {
+			if (error) platform.handleException(error);
 		});
 	}
 	else
@@ -65,6 +81,8 @@ platform.once('ready', function (options) {
 		config  = require('./config.json'),
 		isEmpty = require('lodash.isempty');
 
+	fileNameKey = options.file_name_key;
+	fileContentKey = options.file_content_key;
 	s3Path = isEmpty(options.path) ? config.path.default : path.resolve('/' + options.path);
 
 	s3Client = knox.createClient({

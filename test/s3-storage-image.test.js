@@ -5,13 +5,14 @@ const ACCESS_KEY_ID     = 'AKIAIL4I7RNNSDFPBJBA',
 	  BUCKET            = 'reekoh-data',
 	  REGION            = 'us-standard';
 
-var cp       = require('child_process'),
-	should   = require('should'),
-	knox     = require('knox'),
-	fileName = new Date().getTime().toString(),
+var fs     = require('fs'),
+	cp     = require('child_process'),
+	knox   = require('knox'),
+	path   = require('path'),
+	should = require('should'),
 	storage, s3Client;
 
-describe('Storage', function () {
+describe('S3 Storage - File Test', function () {
 	this.slow(8000);
 
 	before('initialize s3 client', function (done) {
@@ -61,7 +62,9 @@ describe('Storage', function () {
 						key: ACCESS_KEY_ID,
 						secret: SECRET_ACCESS_KEY,
 						bucket: BUCKET,
-						region: REGION
+						region: REGION,
+						'file_name_key': 'name',
+						'file_content_key': 'contents'
 					}
 				}
 			}, function (error) {
@@ -72,28 +75,32 @@ describe('Storage', function () {
 
 	describe('#data', function () {
 		it('should process the data', function (done) {
-			storage.send({
-				type: 'data',
-				data: {
-					s3FileName: fileName + '.json',
-					s3FolderPath: '/',
-					key1: 'value1',
-					key2: 121,
-					key3: 40
-				}
-			}, done);
+			fs.readFile(path.join(process.cwd(), 'test', 'test-files', 'test-photo.png'), function (readFileError, data) {
+				should.ifError(readFileError);
+
+				storage.send({
+					type: 'data',
+					data: {
+						name: 'test.png',
+						contents: new Buffer(data).toString('base64'),
+						key1: 'value1',
+						key2: 121,
+						key3: 40
+					}
+				}, done);
+			});
 		});
 
 		it('should should verify that the file was inserted', function (done) {
 			this.timeout(6000);
 
 			setTimeout(function () {
-				s3Client.getFile(fileName + '.json', function (error, response) {
+				s3Client.getFile('test.png', function (error, response) {
 					should.ifError(error);
 					should.equal(200, response.statusCode);
 					done();
 				});
-			}, 3000);
+			}, 4000);
 		});
 	});
 });

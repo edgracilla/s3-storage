@@ -39,5 +39,17 @@
 	"required": false,
 	"default": "/",
 	"help": "(Optional) Specify your AWS Bucket root folder. Default root (/)."
+  },
+  "file_name_key": {
+	"label": "File Name Key",
+	"type": "String",
+	"required": false,
+	"help": "(Optional) If blank, file names will be auto-generated otherwise, the value of this field is grabbed from the data and set as name of the file."
+  },
+  "file_content_key": {
+	"label": "File Content Key",
+	"type": "String",
+	"required": false,
+	"help": "(Optional) If blank, the content of the file is the data itself (JSON Document) otherwise, the value of this field is grabbed from the data and set as contents of the file."
   }
 }
