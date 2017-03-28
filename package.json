@@ -1,34 +1,37 @@
 {
   "name": "s3-storage",
-  "description": "S3 Storage Plugin for Reekoh IoT Platform. Stores your device data to Amazon S3.",
   "version": "1.0.0",
+  "description": "S3 Storage Plugin for Reekoh IoT Platform. Stores your device data to Amazon S3.",
   "author": "Reekoh, Inc.",
+  "license": "GPL-3.0",
   "main": "app.js",
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp lint"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/Reekoh/s3-storage"
   },
   "dependencies": {
-    "async": "^1.5.2",
-    "knox": "^0.9.2",
-    "lodash.isarray": "^4.0.0",
-    "lodash.isempty": "^4.2.1",
-    "lodash.isplainobject": "^4.0.4",
-    "mime-types": "^2.1.10",
-    "node-uuid": "^1.4.7"
+    "async": "=1.5.2",
+    "knox": "=0.9.2",
+    "lodash.isempty": "=4.2.1",
+    "lodash.isplainobject": "=4.0.4",
+    "mime-types": "=2.1.10",
+    "node-uuid": "=1.4.7",
+    "reekoh": "=1.0.2"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-cli": "^1.2.1",
-    "gulp-jshint": "^2.0.0",
-    "gulp-json-lint": "^0.1.0",
-    "gulp-mocha": "^2.2.0",
-    "gulp-plumber": "^1.1.0",
-    "mocha": "^2.4.5",
-    "should": "^8.3.1"
-  },
-  "license": "LGPL-3.0"
+    "amqplib": "=0.5.1",
+    "gulp": "=3.9.1",
+    "gulp-cli": "=1.2.1",
+    "gulp-jshint": "=2.0.1",
+    "gulp-json-lint": "=0.1.0",
+    "gulp-mocha": "=2.2.0",
+    "gulp-plumber": "=1.1.0",
+    "gulp-standard": "=8.0.4",
+    "jshint": "=2.9.4",
+    "mocha": "=2.5.3",
+    "should": "=9.0.2"
+  }
 }
